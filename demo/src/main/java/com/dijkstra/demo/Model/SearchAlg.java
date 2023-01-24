@@ -39,27 +39,27 @@ public class SearchAlg {
             Square current = stack.pop();
 
             // Check if the current square is the destination square
-            if (current.equals(move.getDestination())) {
-                backtrack(data, current);
-                data.setVisited(visited.toArray(new Square[visited.size()]));
-                solutionFound = true;
-                break;
-            }
-
             // Get the valid neighboring squares
             List<Square> neighbors = getValidNeighbors(data, current);
+            Collections.shuffle(neighbors);
             for (Square neighbor : neighbors) {
                 if (!visited.contains(neighbor)) {
                     stack.push(neighbor);
                     visited.add(neighbor);
 
                     neighbor.setPrev(current);
+                    if (neighbor.equals(move.getDestination())) {
+                        backtrack(data, current);
+                        visited.removeIf(square -> square.equals(move.getDestination()));
+                        visited.removeIf(square -> square.equals(move.getSource()));
+                        data.setVisited(visited.toArray(new Square[visited.size()]));
+                        return;
+                    }
                 }
             }
         }
-        if (!solutionFound) {
             System.out.println("No solution was found");
-        }
+
     }
 
 
@@ -92,6 +92,8 @@ public class SearchAlg {
                 }
             }
         }
+        visited.removeIf(square -> square.equals(move.getDestination()));
+        visited.removeIf(square -> square.equals(move.getSource()));
         data.setVisited(visited.toArray(new Square[visited.size()]));
     }
     // Backtrack from the destination to the source to construct the solution path
@@ -139,12 +141,12 @@ public class SearchAlg {
 
         while (!queue.isEmpty()) {
             Square current = queue.poll();
-            visited.add(current);
+            if(!current.equals(move.getSource()) && !current.equals(move.getDestination()))
+                visited.add(current);
             // Check if the current square is the destination square
             if (current.equals(move.getDestination())) {
                 backtrack(data, current);
-                data.setVisited(visited.toArray(new Square[visited.size()]));
-                return;
+                break;
             }
 
             // Get the valid neighboring squares
@@ -161,6 +163,8 @@ public class SearchAlg {
             }
 
         }
+        visited.removeIf(square -> square.equals(move.getDestination()));
+        visited.removeIf(square -> square.equals(move.getSource()));
         data.setVisited(visited.toArray(new Square[visited.size()]));
     }
 
