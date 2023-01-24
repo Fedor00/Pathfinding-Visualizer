@@ -1,0 +1,18 @@
+<div *ngFor="let row of dataMatrix?.matrix; let i = index" class="matrix-row">
+  <div  *ngFor="let item of row; let j = index" class="matrix-item"     
+    [ngStyle]="{'border': '3px solid #91bccb'}"
+    (click)="onClick($event,i,j)"
+    [ngClass]="{
+      'yellow': showSolution(i, j),
+      'DarkBlue': matrix[i][j],
+      'green': matrixVisited[i][j],
+      'black': item.wall,
+      'white': !showSolution(i, j) && !matrix[i][j] && !matrixVisited[i][j] && !item.wall
+    }"    
+    [draggable]="true"
+    (dragover)="onDrag($event,i,j)">     
+  </div>
+</div>
+
+<button (click)="reset()">RESET</button>
+<button (click)="startDFS()">START Dfs</button>

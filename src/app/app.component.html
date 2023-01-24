@@ -1,0 +1,30 @@
+<div id="app">
+  <nav class="navbar navbar-expand navbar-dark bg-dark">
+    <a href="#" class="navbar-brand">Chess</a>
+
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a href="/bfs" class="nav-link" routerLink="bfs">BFS</a>
+      </li>
+      <li class="nav-item">
+        <a href="/dfs" class="nav-link" routerLink="dfs">DFS</a>
+      </li>
+      <li class="nav-item">
+        <a href="/dijkstra" class="nav-link" routerLink="dijkstra">Djikstra</a>
+      </li>
+      <li class="nav-item">
+        <a href="/AStar" class="nav-link" routerLink="A*">AStar</a>
+      </li>
+      
+      
+  </ul>
+  </nav> 
+  <div class="container">
+    <router-outlet></router-outlet>
+  </div>
+
+  <!--<button (click)="onNewGame()">New Game</button>-->
+  
+ 
+ 
+</div>
