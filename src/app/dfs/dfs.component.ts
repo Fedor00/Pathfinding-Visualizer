@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { DataMatrix, Move, Square } from '../DataMatrix';
 import { SearchAlgService } from '../search-alg.service';
+import { SearchHelperService } from '../search-helper.service';
 
 @Component({
   selector: 'app-dfs',
@@ -11,25 +12,17 @@ import { SearchAlgService } from '../search-alg.service';
 })
 export class DFSComponent implements OnInit{
   title = 'searchAlgorithmDFS';
-  height=40;
-  width=20;
   showS:boolean=false;
   matrix:boolean[][]=[];// used to mark source and destination
   matrixVisited:boolean[][]=[]; // used to mark visitedNodes
-  source:Square;
-  destination:Square;
+  source:Square={x:-1, y:-1, visited:false, wall:false, distance:0};;
+  destination:Square={x:-1, y:-1, visited:false, wall:false, distance:0};
   dataMatrix:DataMatrix;
-  click=0;
+  click={value:0};
   move:Move;
-  constructor(private searchService:SearchAlgService,private cdr: ChangeDetectorRef){
-    for(var i: number = 0; i < this.width; i++) {
-      this.matrix[i] = [];
-      this.matrixVisited[i] = [];
-      for(var j: number = 0; j< this.height; j++) {
-          this.matrix[i][j] = false;
-          this.matrixVisited[i][j] = false;
-      }
-    }
+  constructor(private searchService:SearchAlgService,private searchHelper: SearchHelperService,private cdr:ChangeDetectorRef){
+    searchHelper.resetMatrix(this.matrix);
+    searchHelper.resetMatrix(this.matrixVisited);
   }
 
   ngOnInit(): void {
@@ -39,45 +32,26 @@ export class DFSComponent implements OnInit{
   public getDataDfs():void{
       this.searchService.getDataDfs().subscribe(
         (response: DataMatrix)=>{
-        this.dataMatrix=response;
+        this.dataMatrix=response;     
       },(error:HttpErrorResponse)=>{
         console.log(error);
       } );
   }
   onDrag(event: DragEvent,i:number,j:number) {
+    
     this.dataMatrix.matrix[i][j].wall=true;
   }
   // after bfs is done, we print solution
   showSolution(i:number,j:number):boolean{
-    if(this.dataMatrix && this.showS)
-      if(this.dataMatrix?.solution)
-        for(let k=0; k<this.dataMatrix?.solution?.length; k++){
-          if(this.dataMatrix.solution[k].x==i && this.dataMatrix.solution[k].y==j ){
-            this.matrixVisited[i][j]=false;
-            return true;
-          }
-          
-        }
-    return false;
+    return this.searchHelper.showSolution(i,j,this.dataMatrix,this.showS,this.matrixVisited);
   }
   //used to mark source and destination
   public onClick(event: MouseEvent,i:number,j:number){
-    if(this.click<3){
-      if(event.button==0){
-        this.click++;
-        if(this.click==1){
-          this.source={x:i,y:j,visited:false,wall:false,distance:0};
-          this.matrix[i][j]=true;
-        }
-        if(this.click==2){
-          this.destination={x:i,y:j,visited:false,wall:false,distance:0};
-          this.matrix[i][j]=true;
-        }
-      }
-    }
+    this.searchHelper.onClick(this.source,this.destination,this.click,this.matrix,i,j);
   }
   //updates view for every visited node every 1ms
   public showVisited(i=0){
+    console.log(this.source.x);
     if (i === this.dataMatrix.visited.length) {
       this.showS=true;
       return;
@@ -90,14 +64,13 @@ export class DFSComponent implements OnInit{
     }, 1); 
   }
   // request to back-end to start bfs
-  public startDFS():void{
+  public startDfs():void{
     this.move={source:this.source,destination:this.destination,data:this.dataMatrix};
       this.searchService.startDFS(this.move).subscribe(
         (response: DataMatrix)=>{
         this.dataMatrix=response;
         if(this.dataMatrix){
-          this.showVisited();
-         
+          this.showVisited();  
         }     
       },(error:HttpErrorResponse)=>{
         console.log(error);
@@ -105,15 +78,10 @@ export class DFSComponent implements OnInit{
   }
   //resets visited and source-destination squares + request to reset dataBfs in back-end
   public reset():void{
-    for(var i: number = 0; i < this.width; i++) {
-      this.matrix[i] = [];
-      this.matrixVisited[i] = [];
-      for(var j: number = 0; j< this.height; j++) {
-          this.matrix[i][j] = false;
-          this.matrixVisited[i][j] = false;
-      }
-    }
-    this.click=0;
+    this.searchHelper.resetMatrix(this.matrix);
+    this.searchHelper.resetMatrix(this.matrixVisited);
+
+    this.click={value:0};
     this.showS=false;
       this.searchService.resetDfs().subscribe(
         (response: DataMatrix)=>{

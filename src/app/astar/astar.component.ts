@@ -17,7 +17,7 @@ export class AStarComponent {
   source:Square={x:-1, y:-1, visited:false, wall:false, distance:0};;
   destination:Square={x:-1, y:-1, visited:false, wall:false, distance:0};
   dataMatrix:DataMatrix;
-  click={value:1};
+  click={value:0};
   move:Move;
   constructor(private searchService:SearchAlgService,private searchHelper: SearchHelperService,private cdr:ChangeDetectorRef){
     searchHelper.resetMatrix(this.matrix);
